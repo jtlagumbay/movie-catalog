@@ -1,0 +1,13 @@
+Django
+djangorestframework
+django-cors-headers
+psycopg2-binary
+python-decouple
+redis
+celery
+gunicorn
+whitenoise
+Pillow
+dj-database-url
+moviepy
+opencv-python-headless

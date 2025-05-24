@@ -1,0 +1,18 @@
+# Node.js dependencies
+node_modules/
+
+# Python virtual environment
+venv/
+
+# Media files
+backend/media/thumbnail/
+backend/media/videos/
+
+# Angular cache
+.angular/
+
+# VS Code settings
+.vscode/
+
+# Environment variables
+.env

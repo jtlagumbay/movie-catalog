@@ -1,0 +1,178 @@
+<!-- <div class="movies-container">
+  <div class="header">
+    <h1>Movies Catalog</h1>
+    <button class="create-btn" (click)="navigateToCreate()">
+      Add New Movie
+    </button>
+  </div>
+
+  <div class="movies-grid">
+    <div 
+      *ngFor="let movie of movies; trackBy: trackByMovieId" 
+      class="movie-card"
+    >
+      <h2 class="movie-title">{{ movie.title }}</h2>
+      <p class="movie-date">{{ movie.date_added }}</p>
+      <p class="movie-description">{{ movie.description }}</p>
+      
+      <app-video-player
+        [videoUrl]="movie.video_file"
+        [muted]=true
+        [autoplay]=false
+        [posterUrl]="movie.thumbnail"
+        >
+      </app-video-player>
+
+      <div class="movie-actions">
+        <button 
+          class="details-btn" 
+          (click)="navigateToDetails(movie.id)"
+        >
+          View Details
+        </button>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<div class="movies-container">
+  <!-- Header Section -->
+  <div class="header">
+    <h1 class="catalog-title">Movies</h1>
+    <button class="add-movie-btn" (click)="navigateToCreate()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 1V15M1 8H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      Add Movie
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-grid">
+      <div *ngFor="let item of skeletonItems" class="skeleton-card">
+        <div class="skeleton-poster"></div>
+        <div class="skeleton-content">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-date"></div>
+          <div class="skeleton-description"></div>
+          <div class="skeleton-description short"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="hasError && !isLoading" class="error-container">
+    <div class="error-content">
+      <svg class="error-icon" width="64" height="64" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+        <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/>
+        <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      <h2 class="error-title">Something went wrong</h2>
+      <p class="error-message">{{ errorMessage || 'Unable to load movies. Please try again.' }}</p>
+      <button class="retry-btn" (click)="retryLoad()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M1 4V10A6 6 0 0 0 13 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="3,8 1,10 3,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Try Again
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && !hasError && movies.length === 0" class="empty-container">
+    <div class="empty-content">
+      <svg class="empty-icon" width="80" height="80" viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+        <line x1="8" y1="21" x2="16" y2="21" stroke="currentColor" stroke-width="2"/>
+        <line x1="12" y1="17" x2="12" y2="21" stroke="currentColor" stroke-width="2"/>
+        <polygon points="10,9 15,12 10,15" fill="currentColor"/>
+      </svg>
+      <h2 class="empty-title">No movies yet</h2>
+      <p class="empty-message">Start building your collection by adding your first movie.</p>
+      <button class="empty-action-btn" (click)="navigateToCreate()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 1V15M1 8H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Add Your First Movie
+      </button>
+    </div>
+  </div>
+
+  <!-- Movies Grid -->
+  <div *ngIf="!isLoading && !hasError && movies.length > 0" class="movies-grid">
+    <div 
+      *ngFor="let movie of movies; trackBy: trackByMovieId" 
+      class="movie-card"
+      (mouseenter)="onCardHover(movie.id, true)"
+      (mouseleave)="onCardHover(movie.id, false)"
+    >
+      <div class="movie-poster-container">
+        <app-video-player
+          [videoUrl]="movie.video_file"
+          [muted]="true"
+          [autoplay]="false"
+          [posterUrl]="movie.thumbnail"
+          [controls]="false"
+          class="movie-video"
+        >
+        </app-video-player>
+        
+        <div class="movie-overlay">
+          <button 
+            class="play-btn" 
+            (click)="navigateToDetails(movie.id)"
+            [attr.aria-label]="'Play ' + movie.title"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <polygon points="5,3 19,12 5,21" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="movie-info-overlay">
+          <div class="movie-actions-top">
+            <button 
+              class="action-btn like-btn" 
+              (click)="toggleLike(movie.id)"
+              [class.liked]="movie.is_liked"
+              [attr.aria-label]="movie.is_liked ? 'Unlike movie' : 'Like movie'"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" 
+                      [attr.fill]="movie.is_liked ? 'currentColor' : 'none'" 
+                      stroke="currentColor" 
+                      stroke-width="2"/>
+              </svg>
+            </button>
+            
+            <button 
+              class="action-btn details-btn" 
+              (click)="navigateToDetails(movie.id)"
+              [attr.aria-label]="'View details for ' + movie.title"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="1" fill="currentColor"/>
+                <circle cx="12" cy="5" r="1" fill="currentColor"/>
+                <circle cx="12" cy="19" r="1" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="movie-info">
+        <h3 class="movie-title">{{ movie.title }}</h3>
+        <div class="movie-meta">
+          <span class="movie-year">{{ getYear(movie.date_added) }}</span>
+        </div>
+        <p class="movie-description" [title]="movie.description">
+          {{ truncateDescription(movie.description) }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

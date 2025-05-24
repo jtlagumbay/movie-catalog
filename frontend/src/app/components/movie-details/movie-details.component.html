@@ -1,0 +1,227 @@
+<!-- <div class="details-container">
+  <div class="header">
+    <button class="back-btn" (click)="goBack()">
+      ← Back to Movies
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Loading movie details...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="movie && !loading" class="movie-details">
+    <h1>{{ movie.title }}</h1>
+    
+    <div class="movie-meta">
+      <p><strong>Date Added:</strong> {{ movie.date_added }}</p>
+      <p><strong>Description:</strong> {{ movie.description }}</p>
+    </div>
+
+    <div class="video-container">
+      <app-video-player
+        [videoUrl]="movie.video_file"
+        [controls]=true
+        [muted]=false
+        />
+    </div>
+
+    <div class="actions">
+      <button class="edit-btn" (click)="editMovie()">
+        Edit Movie
+      </button>
+      <button class="delete-btn" (click)="deleteMovie()">
+        Delete Movie
+      </button>
+    </div>
+  </div>
+</div> -->
+
+<div class="details-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-hero">
+      <div class="skeleton-video"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-meta">
+          <div class="skeleton-tag"></div>
+          <div class="skeleton-tag"></div>
+          <div class="skeleton-tag"></div>
+        </div>
+        <div class="skeleton-description"></div>
+        <div class="skeleton-description short"></div>
+        <div class="skeleton-actions">
+          <div class="skeleton-button"></div>
+          <div class="skeleton-button"></div>
+          <div class="skeleton-button"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="hasError && !isLoading" class="error-container">
+    <button class="back-btn error-back" (click)="goBack()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Back to Movies
+    </button>
+    
+    <div class="error-content">
+      <svg class="error-icon" width="80" height="80" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+        <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/>
+        <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      <h2 class="error-title">Movie Not Found</h2>
+      <p class="error-message">{{ errorMessage || 'The movie you\'re looking for doesn\'t exist or has been removed.' }}</p>
+      <div class="error-actions">
+        <button class="retry-btn" (click)="retryLoad()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M1 4V10A6 6 0 0 0 13 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="3,8 1,10 3,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Try Again
+        </button>
+        <button class="browse-btn" (click)="goBack()">Browse Movies</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Movie Details -->
+  <div *ngIf="movie && !isLoading && !hasError" class="movie-hero">
+    <!-- Background Gradient Overlay -->
+    <div class="hero-background" [style.background-image]="'url(movie.thumbnail )'">
+      <div class="hero-overlay"></div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="hero-nav">
+      <button class="back-btn" (click)="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back to Movies
+      </button>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="hero-content">
+      <div class="hero-info">
+        <h1 class="movie-title">{{ movie.title }}</h1>
+        
+        <div class="movie-meta">
+          <div class="meta-row">
+            <span class="year">{{ getYear(movie.date_added) }}</span>
+          </div>
+        </div>
+
+        <p class="movie-description" *ngIf="movie.description">
+          {{ movie.description }}
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="hero-actions">
+          <button class="play-btn" (click)="playMovie()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <polygon points="5,3 19,12 5,21" fill="currentColor"/>
+            </svg>
+            Play
+          </button>
+          
+          <button class="list-btn" (click)="toggleWatchlist()" [class.added]="isInWatchlist">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" *ngIf="!isInWatchlist"/>
+              <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" *ngIf="isInWatchlist"/>
+            </svg>
+            {{ isInWatchlist ? 'In Watchlist' : 'Add to Watchlist' }}
+          </button>
+
+          <button class="like-btn" (click)="toggleLike()" [class.liked]="isLiked">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" 
+                    [attr.fill]="isLiked ? 'currentColor' : 'none'" 
+                    stroke="currentColor" 
+                    stroke-width="2"/>
+            </svg>
+          </button>
+
+          <div class="dropdown-container">
+            <button class="more-btn" (click)="toggleDropdown()" #moreButton>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="1" fill="currentColor"/>
+                <circle cx="12" cy="5" r="1" fill="currentColor"/>
+                <circle cx="12" cy="19" r="1" fill="currentColor"/>
+              </svg>
+            </button>
+            
+            <div class="dropdown-menu" [class.show]="showDropdown">
+              <button class="dropdown-item" (click)="editMovie(); hideDropdown()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Edit Movie
+              </button>
+              
+              <button class="dropdown-item danger" (click)="confirmDelete(); hideDropdown()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Delete Movie
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video Player Section -->
+      <div class="video-section">
+        <div class="video-container" [class.expanded]="isVideoExpanded">
+          <app-video-player
+            [videoUrl]="movie.video_file"
+            [controls]="true"
+            [muted]="false"
+            [posterUrl]="movie.thumbnail"
+            [autoplay]="false"
+            class="movie-player"
+          />
+          
+          <button class="expand-btn" (click)="toggleVideoExpanded()" *ngIf="movie.video_file">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" *ngIf="!isVideoExpanded"/>
+              <polyline points="9,14 3,14 3,20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" *ngIf="!isVideoExpanded"/>
+              <line x1="21" y1="3" x2="14" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" *ngIf="!isVideoExpanded"/>
+              <line x1="3" y1="21" x2="10" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round" *ngIf="!isVideoExpanded"/>
+              
+              <polyline points="4,14 10,14 10,20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" *ngIf="isVideoExpanded"/>
+              <polyline points="20,10 14,10 14,4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" *ngIf="isVideoExpanded"/>
+              <line x1="14" y1="10" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" *ngIf="isVideoExpanded"/>
+              <line x1="3" y1="21" x2="10" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round" *ngIf="isVideoExpanded"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" [class.show]="showDeleteModal" (click)="cancelDelete()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Delete Movie</h3>
+      <p>Are you sure you want to delete "{{ movie.title }}"? This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="cancelDelete()">Cancel</button>
+        <button class="delete-confirm-btn" (click)="deleteMovie()" [disabled]="isDeletingMovie">
+          <span *ngIf="!isDeletingMovie">Delete</span>
+          <span *ngIf="isDeletingMovie">Deleting...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

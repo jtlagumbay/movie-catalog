@@ -1,0 +1,43 @@
+<div class="video-container" [class.loading]="isLoading">
+      <!-- Loading overlay -->
+      <div *ngIf="isLoading" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">
+          <p>Loading video...</p>
+          <div *ngIf="loadingProgress > 0" class="progress-bar">
+            <div class="progress-fill" [style.width.%]="loadingProgress"></div>
+          </div>
+          <p *ngIf="loadingProgress > 0">{{ loadingProgress.toFixed(1) }}%</p>
+        </div>
+      </div>
+
+      <!-- Video element -->
+      <video
+        #videoElement
+        [src]="videoUrl"
+        [muted]="muted"
+        [controls]="controls"
+        [autoplay]="autoplay"
+        preload="metadata"
+        [poster]="posterUrl"
+        (loadstart)="onLoadStart()"
+        (loadedmetadata)="onLoadedMetadata()"
+        (loadeddata)="onLoadedData()"
+        (progress)="onProgress()"
+        (canplay)="onCanPlay()"
+        (canplaythrough)="onCanPlayThrough()"
+        (error)="onError($event)"
+        (waiting)="onWaiting()"
+        (playing)="onPlaying()"
+        class="video-player"
+        oncanplay="this.play()" 
+        >
+        Your browser does not support the video tag.
+      </video>
+
+      <!-- Error message -->
+      <div *ngIf="hasError" class="error-message">
+        <p>Error loading video. Please try again.</p>
+        <button (click)="retryLoad()">Retry</button>
+      </div>
+    </div>

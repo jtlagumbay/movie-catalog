@@ -1,0 +1,276 @@
+<!-- <div class="create-container">
+  <div class="header">
+    <h1>{{ isEditMode ? 'Edit Movie' : 'Create New Movie' }}</h1>
+  </div>
+
+  <form [formGroup]="movieForm" (ngSubmit)="onSubmit()" class="movie-form" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="title">Title *</label>
+      <input 
+        type="text" 
+        id="title" 
+        formControlName="title"
+        class="form-control"
+        [class.is-invalid]="title?.invalid && title?.touched"
+      >
+      <div *ngIf="title?.invalid && title?.touched" class="invalid-feedback">
+        <div *ngIf="title?.errors?.['required']">Title is required</div>
+        <div *ngIf="title?.errors?.['minlength']">Title must be at least 1 character</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description *</label>
+      <textarea 
+        id="description" 
+        formControlName="description"
+        class="form-control"
+        rows="4"
+        [class.is-invalid]="description?.invalid && description?.touched"
+      ></textarea>
+      <div *ngIf="description?.invalid && description?.touched" class="invalid-feedback">
+        <div *ngIf="description?.errors?.['required']">Description is required</div>
+        <div *ngIf="description?.errors?.['minlength']">Description must be at least 10 characters</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="video_file">Video File *</label>
+      <div class="file-upload-container">
+        <input 
+          type="file" 
+          id="video_file" 
+          accept="video/*"
+          (change)="onFileSelected($event)"
+          class="file-input"
+          [class.is-invalid]="video_file?.invalid && video_file?.touched"
+        >
+        <div class="file-upload-display">
+          <div *ngIf="!selectedFile && !videoPreviewUrl" class="file-placeholder">
+            <span>Choose video file...</span>
+          </div>
+          <div *ngIf="selectedFile || videoPreviewUrl" class="file-selected">
+            <div class="file-info">
+              <span class="file-name">
+                {{ selectedFile ? selectedFile.name : 'Current video file' }}
+              </span>
+              <span *ngIf="selectedFile" class="file-size">
+                ({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)
+              </span>
+              <button 
+                type="button" 
+                class="remove-file-btn"
+                (click)="removeFile()"
+                title="Remove file"
+              >
+                ×
+              </button>
+            </div>
+            <div *ngIf="videoPreviewUrl" class="video-preview">
+              <app-video-player
+                [videoUrl]="videoPreviewUrl"
+                [muted]=false
+                [autoplay]="false"
+                [controls]="true"
+                />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="video_file?.invalid && video_file?.touched" class="invalid-feedback">
+        <div *ngIf="video_file?.errors?.['required']">Video file is required</div>
+      </div>
+      <small class="form-text">
+        Supported formats: MP4, AVI, MOV, WMV, WebM. Max size: 100MB
+      </small>
+    </div>
+
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        class="submit-btn"
+        [disabled]="movieForm.invalid || loading"
+      >
+        {{ loading ? 'Saving...' : (isEditMode ? 'Update Movie' : 'Create Movie') }}
+      </button>
+      <button 
+        type="button" 
+        class="cancel-btn"
+        (click)="cancel()"
+        [disabled]="loading"
+      >
+        Cancel
+      </button>
+    </div>
+  </form>
+</div> -->
+
+<!-- movie-create.component.html -->
+<div class="create-container">
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">
+      {{ isEditMode ? 'Updating your movie...' : 'Creating your movie...' }}
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>{{ isEditMode ? 'Edit Movie' : 'Create New Movie' }}</h1>
+  </div>
+
+  <!-- Main Form -->
+  <form [formGroup]="movieForm" (ngSubmit)="onSubmit()" class="movie-form" enctype="multipart/form-data">
+    
+    <!-- Title Field -->
+    <div class="form-group">
+      <label for="title">Title *</label>
+      <input 
+        type="text" 
+        id="title" 
+        formControlName="title"
+        class="form-control"
+        [class.is-invalid]="title?.invalid && title?.touched"
+        placeholder="Enter movie title"
+      >
+      <div *ngIf="title?.invalid && title?.touched" class="invalid-feedback">
+        <div *ngIf="title?.errors?.['required']" class="error-item">
+          <span class="error-icon">⚠</span>
+          Title is required
+        </div>
+        <div *ngIf="title?.errors?.['minlength']" class="error-item">
+          <span class="error-icon">⚠</span>
+          Title must be at least 1 character
+        </div>
+      </div>
+    </div>
+
+    <!-- Description Field -->
+    <div class="form-group">
+      <label for="description">Description *</label>
+      <textarea 
+        id="description" 
+        formControlName="description"
+        class="form-control"
+        rows="4"
+        [class.is-invalid]="description?.invalid && description?.touched"
+        placeholder="Enter a compelling movie description (minimum 10 characters)"
+      ></textarea>
+      <div *ngIf="description?.invalid && description?.touched" class="invalid-feedback">
+        <div *ngIf="description?.errors?.['required']" class="error-item">
+          <span class="error-icon">⚠</span>
+          Description is required
+        </div>
+        <div *ngIf="description?.errors?.['minlength']" class="error-item">
+          <span class="error-icon">⚠</span>
+          Description must be at least 10 characters
+        </div>
+      </div>
+    </div>
+
+    <!-- Video File Field -->
+    <div class="form-group">
+      <label for="video_file">Video File {{ !isEditMode ? '*' : '' }}</label>
+      <div class="file-upload-container">
+        <input 
+          type="file" 
+          id="video_file" 
+          accept="video/*"
+          (change)="onFileSelected($event)"
+          class="file-input"
+          [class.is-invalid]="video_file?.invalid && video_file?.touched"
+        >
+        <div class="file-upload-display" 
+             [class.has-file]="selectedFile || videoPreviewUrl"
+             [class.drag-over]="false">
+          
+          <!-- File Placeholder -->
+          <div *ngIf="!selectedFile && !videoPreviewUrl" class="file-placeholder">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">
+              <span class="upload-title">Choose video file</span>
+              <span class="upload-subtitle">or drag and drop here</span>
+            </div>
+          </div>
+          
+          <!-- Selected File Display -->
+          <div *ngIf="selectedFile || videoPreviewUrl" class="file-selected">
+            <div class="file-info">
+              <div class="file-details">
+                <span class="file-name">
+                  {{ selectedFile ? selectedFile.name : 'Current video file' }}
+                </span>
+                <span *ngIf="selectedFile" class="file-size">
+                  {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
+                </span>
+              </div>
+              <button 
+                type="button" 
+                class="remove-file-btn"
+                (click)="removeFile()"
+                title="Remove file"
+              >
+                <span>×</span>
+              </button>
+            </div>
+            
+            <!-- Video Preview -->
+            <div *ngIf="videoPreviewUrl" class="video-preview">
+              <app-video-player
+                [videoUrl]="videoPreviewUrl"
+                [muted]="false"
+                [autoplay]="false"
+                [controls]="true"
+                class="preview-player"
+              ></app-video-player>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Video Field Validation -->
+      <div *ngIf="video_file?.invalid && video_file?.touched" class="invalid-feedback">
+        <div *ngIf="video_file?.errors?.['required']" class="error-item">
+          <span class="error-icon">⚠</span>
+          Video file is required
+        </div>
+      </div>
+      
+      <!-- Help Text -->
+      <small class="form-text">
+        <span class="help-icon">💡</span>
+        Supported formats: MP4, AVI, MOV, WMV, WebM • Max size: 100MB
+      </small>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        class="submit-btn"
+        [disabled]="movieForm.invalid || loading"
+        [class.loading]="loading"
+      >
+        <span *ngIf="!loading" class="btn-content">
+          <span class="btn-icon">{{ isEditMode ? '✓' : '+' }}</span>
+          {{ isEditMode ? 'Update Movie' : 'Create Movie' }}
+        </span>
+        <span *ngIf="loading" class="btn-loading">
+          <span class="btn-spinner"></span>
+          {{ isEditMode ? 'Updating...' : 'Creating...' }}
+        </span>
+      </button>
+      
+      <button 
+        type="button" 
+        class="cancel-btn"
+        (click)="cancel()"
+        [disabled]="loading"
+      >
+        <span class="btn-icon">←</span>
+        Cancel
+      </button>
+    </div>
+  </form>
+</div>

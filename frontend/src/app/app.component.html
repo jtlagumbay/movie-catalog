@@ -1,0 +1,18 @@
+<div class="app-container">
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <a routerLink="/movies">Movie Catalog</a>
+      </div>
+      <div class="nav-links">
+        <a routerLink="/movies" routerLinkActive="active">Movies</a>
+        <a routerLink="/movies/create" routerLinkActive="active">Add Movie</a>
+      </div>
+    </div>
+
+  </nav>
+  
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
