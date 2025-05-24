@@ -1,101 +1,3 @@
-# import os
-# from celery import shared_task
-# from moviepy import VideoFileClip
-# from .models import Movie
-# import logging
-# logger = logging.getLogger(__name__)
-
-# @shared_task
-# def generate_thumbnail(video_path, thumbnail_path, movie_id, time=1.0):
-#     print("generate thumbnail")
-#     from django.conf import settings
-    
-#     # Construct absolute paths in the celery worker
-#     video_path = os.path.join(settings.MEDIA_ROOT, video_path)
-#     thumbnail_path = os.path.join(settings.MEDIA_ROOT, thumbnail_path)
-    
-#     logger.info(f"Celery constructed paths:")
-#     logger.info(f"Video: {video_path}")
-#     logger.info(f"Thumbnail: {thumbnail_path}")
-#     logger.info(f"Video exists: {os.path.exists(video_path)}")
-#     try:
-#         if not os.path.exists(video_path):
-#             return f"Video file not found: {video_path}"
-        
-#         clip = VideoFileClip(video_path)
-#         print("clip")
-#         frame = clip.get_frame(time)
-#         print("frame")
-#         from PIL import Image
-#         img = Image.fromarray(frame)
-#         os.makedirs(os.path.dirname(thumbnail_path), exist_ok=True)
-#         img.save(thumbnail_path)
-#         print("img save")
-
-#         movie = Movie.objects.get(id=movie_id)
-#         movie.thumbnail = thumbnail_path.replace('media/', '')  # adjust for MEDIA_URL
-#         movie.save()
-
-#         return f"Thumbnail saved to {thumbnail_path}"
-#     except Exception as e:
-#         return str(e)
-
-# # @shared_task
-# # def generate_thumbnail_by_id(movie_id, time=1.0):
-# #     """
-# #     Alternative task that fetches movie data within the task.
-# #     This is more robust as it ensures fresh data from the database.
-# #     """
-# #     try:
-# #         movie = Movie.objects.get(id=movie_id)
-        
-# #         if not movie.video_file:
-# #             return f"No video file found for movie {movie_id}"
-        
-# #         video_file_path = movie.video_file.path
-# #         thumbnail_path = movie.get_thumbnail_path()
-        
-# #         print(f"Task - Video file path: {video_file_path}")
-# #         print(f"Task - File exists: {os.path.exists(video_file_path)}")
-        
-# #         if not os.path.exists(video_file_path):
-# #             # Try constructing the path differently
-# #             from django.conf import settings
-# #             alternative_path = os.path.join(settings.MEDIA_ROOT, movie.video_file.name)
-# #             print(f"Task - Alternative path: {alternative_path}")
-# #             print(f"Task - Alternative exists: {os.path.exists(alternative_path)}")
-            
-# #             if os.path.exists(alternative_path):
-# #                 video_file_path = alternative_path
-# #             else:
-# #                 return f"Video file not found at any expected location: {video_file_path}"
-        
-# #         # Generate thumbnail
-# #         clip = VideoFileClip(video_file_path)
-        
-# #         if time >= clip.duration:
-# #             time = min(1.0, clip.duration / 2)
-        
-# #         frame = clip.get_frame(time)
-# #         clip.close()
-        
-# #         img = Image.fromarray(frame)
-# #         os.makedirs(os.path.dirname(thumbnail_path), exist_ok=True)
-# #         img.save(thumbnail_path, quality=85, optimize=True)
-        
-# #         # Update movie with thumbnail
-# #         relative_path = os.path.relpath(thumbnail_path, settings.MEDIA_ROOT)
-# #         movie.thumbnail = relative_path
-# #         movie.save(update_fields=['thumbnail'])
-        
-# #         return f"Thumbnail successfully generated for movie {movie_id}"
-        
-# #     except Movie.DoesNotExist:
-# #         return f"Movie with id {movie_id} not found"
-# #     except Exception as e:
-# #         return f"Error generating thumbnail for movie {movie_id}: {str(e)}"
-
-# tasks.py
 from celery import shared_task
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -219,7 +121,6 @@ def extract_thumbnail(video_path, movie_id, frame_time=10):
         return None
 
 
-# Alternative task for batch processing
 @shared_task
 def generate_missing_thumbnails():
     """

@@ -1,45 +1,49 @@
-# Setup
+# Movie Platform Fullstack Application
+## Tech Stack
+1. Frontend
+   - Angular
+   - Note: A React frontend app was initially created, but migrated to Angular. It is in frontend-react. This can be ignored.
+2. Backend
+   - Django
+   - Celery
+   - Redis
+   - Postgresql
+3. Devops
+   - Docker-compose
 
-## Requirements
-Python 3.10
-## Steps
+## Prerequisites
+1. Python 3.10+
+2. Node.js 16+
+3. NPM 10+
+4. Docker 20+
+5. Docker Compose 2+
 
-1. `chmod +x setup.sh` 
-2. source ./setup.sh
+## Setup Instructions
+1. Clone the repository: `https://github.com/jtlagumbay/movie-catalog`
+2. Change directory: `cd movie-catalog`
+3. Create .env with following keys:
+    ```
+    POSTGRES_USER=movie_user
+    POSTGRES_PASSWORD=movie_password
+    POSTGRES_DB=movie_db
+    DB_HOST=postgres
+    DB_PORT=5432
 
-# Start the container (if using docker-compose)
-docker-compose up -d
+    # Frontend variables
+    VITE_API_URL=http://localhost:8000
 
-# Connect to the database
-docker exec -it postgres-db psql -U movie_user -d movie_db
+    # Backend variables
+    DEBUG
+    DATABASE_URL
+    CORS_ALLOWED_ORIGINS
+    DJANGO_SUPERUSER_USERNAME
+    DJANGO_SUPERUSER_EMAIL
+    DJANGO_SUPERUSER_PASSWORD
+    REDIS_URL
+    ```
+4. Run docker compose: `docker-compose up --build`
 
-# View logs
-docker logs postgres-db
+## Known Issues and limitations
+1. The video streaming is currently not adaptive, but byte-range support was implemented to load videos faster.
+2. Thumbnail is generated on celery but currently cannot regenerate new thumbnail for newly updated video file. 
 
-# Stop the container
-docker stop postgres-db
-
-# Remove the container
-docker rm postgres-db
-
-# Backup database
-docker exec postgres-db pg_dump -U myuser mydatabase > backup.sql
-
-# Restore database
-docker exec -i postgres-db psql -U myuser -d mydatabase < backup.sql
-
-# Stop everything and clean up
-docker-compose down -v
-docker system prune -f
-
-# Remove any existing containers
-docker rm -f $(docker ps -aq) 2>/dev/null || true
-
-# Rebuild and start
-docker-compose build --no-cache
-docker-compose up
-
-# running script while docker is running
-docker exec -it 8efa03609505 bash
-
-npm install -g @angular/cli

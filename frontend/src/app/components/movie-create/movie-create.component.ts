@@ -104,6 +104,7 @@ export class MovieCreateComponent implements OnInit {
           if (this.videoPreviewUrl && this.selectedFile) {
             URL.revokeObjectURL(this.videoPreviewUrl);
           }
+          this.toastService.showSuccess("Movie created successfuly.")
           this.router.navigate(['/movies']);
         },
         error: (error) => {
