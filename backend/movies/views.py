@@ -10,6 +10,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import Movie
 from .serializers import MovieSerializer
+from .signals import _clear_list_cache
 
 CACHE_TTL = 60 * 5  # 5 minutes
 
@@ -46,9 +47,7 @@ class MovieListCreateView(generics.ListCreateAPIView):
         """Create movie and invalidate list cache."""
         response = super().create(request, *args, **kwargs)
         
-        # Increment cache version to invalidate all list caches
-        current_version = cache.get('movies:list:version', 1)
-        cache.set('movies:list:version', current_version + 1)
+        _clear_list_cache()
         
         return response
     
@@ -91,13 +90,7 @@ class MovieDetailView(generics.RetrieveUpdateDestroyAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        # Clear caches
-        cache_key = self.get_cache_key(instance.pk)
-        cache.delete(cache_key)
-        
-        # Increment list cache version
-        current_version = cache.get('movies:list:version', 1)
-        cache.set('movies:list:version', current_version + 1)
+        _clear_list_cache()
 
         return Response(serializer.data)
     
@@ -106,13 +99,7 @@ class MovieDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         instance.soft_delete()
 
-        # Clear caches
-        cache_key = self.get_cache_key(instance.pk)
-        cache.delete(cache_key)
-        
-        # Increment list cache version
-        current_version = cache.get('movies:list:version', 1)
-        cache.set('movies:list:version', current_version + 1)
+        _clear_list_cache()
 
         return Response({'detail': 'Movie deleted.'}, status=status.HTTP_204_NO_CONTENT)
 
@@ -173,8 +160,8 @@ class VideoStreamingView(View):
         if range_header:
             response['Content-Range'] = f'bytes {first_byte}-{last_byte}/{file_size}'
         
-        # Cache headers
-        response['Cache-Control'] = 'public, max-age=3600'
-        response['ETag'] = f'"{hash(file_path + str(os.path.getmtime(file_path)))}"'
+        # # Cache headers
+        # response['Cache-Control'] = 'public, max-age=3600'
+        # response['ETag'] = f'"{hash(file_path + str(os.path.getmtime(file_path)))}"'
         
         return response

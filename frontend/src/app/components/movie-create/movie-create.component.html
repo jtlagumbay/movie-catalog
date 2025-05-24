@@ -112,7 +112,7 @@
             <div *ngIf="videoPreviewUrl" class="video-preview">
               <app-video-player
                 [videoUrl]="videoPreviewUrl"
-                [muted]="false"
+                [muted]="true"
                 [autoplay]="false"
                 [controls]="true"
                 class="preview-player"
@@ -133,7 +133,7 @@
       <!-- Help Text -->
       <small class="form-text">
         <span class="help-icon">💡</span>
-        Supported formats: MP4, AVI, MOV, WMV, WebM • Max size: 100MB
+        Supported formats: MP4 • Max size: 100MB
       </small>
     </div>
 

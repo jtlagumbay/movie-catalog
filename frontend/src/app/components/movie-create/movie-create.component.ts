@@ -125,9 +125,9 @@ export class MovieCreateComponent implements OnInit {
       console.log(file)
       
       // Validate file type
-      const allowedTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/webm'];
+      const allowedTypes = ['video/mp4'];
       if (!allowedTypes.includes(file.type)) {
-        alert('Please select a valid video file (MP4, AVI, MOV, WMV, WebM)');
+        alert('Please select a valid video file (MP4)');
         input.value = '';
         return;
       }

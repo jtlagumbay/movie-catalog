@@ -23,11 +23,11 @@
 2. Change directory: `cd movie-catalog`
 3. Create .env with following keys:
     ```
-    POSTGRES_USER=movie_user
-    POSTGRES_PASSWORD=movie_password
-    POSTGRES_DB=movie_db
-    DB_HOST=postgres
-    DB_PORT=5432
+    POSTGRES_USER
+    POSTGRES_PASSWORD
+    POSTGRES_DB
+    DB_HOST
+    DB_PORT
 
     # Frontend variables
     VITE_API_URL=http://localhost:8000
@@ -46,4 +46,14 @@
 ## Known Issues and limitations
 1. The video streaming is currently not adaptive, but byte-range support was implemented to load videos faster.
 2. Thumbnail is generated on celery but currently cannot regenerate new thumbnail for newly updated video file. 
+3. The video_file is not properly cached. Updated video may not show right away.
+4. UI is not optimized for mobile. 
+5. Authentication not yet implemented.
+6. Supports MP4 for now. Max size is 100 MB.
 
+## Demo Videos
+[Google Drive Link](https://drive.google.com/file/d/1DmUqQn0TD6OiheGwJzHVVniO6DdCSSE6/view?usp=sharing) to the demo.
+
+
+
+Let me know any comments and suggestions. Thank you. 
