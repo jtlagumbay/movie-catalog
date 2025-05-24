@@ -30,7 +30,7 @@
     DB_PORT
 
     # Frontend variables
-    VITE_API_URL=http://localhost:8000
+    VITE_API_URL
 
     # Backend variables
     DEBUG
